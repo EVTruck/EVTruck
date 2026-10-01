@@ -430,6 +430,8 @@ class Shunt(Compound):
 
 
 class Relay(Compound):
+    mounting_hole_separation = 43.6 * MM
+
     def __init__(self) -> None:
         imported = self._import()
         super().__init__(children=imported.children, label=imported.label)
@@ -486,7 +488,7 @@ class ContactorBoxAssembly(Model):
         return Shunt()
 
     @cached_property
-    def relay(self) -> Compound:
+    def relay(self) -> Relay:
         return Relay()
 
     @cached_property
@@ -543,6 +545,17 @@ class ContactorBoxAssembly(Model):
             ):
                 Cylinder(
                     radius=2.55,
+                    height=self.plate_thickness,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT,
+                )
+
+            with (
+                Locations(mp.joints["relay_attach"].location),
+                GridLocations(0, self.relay.mounting_hole_separation, 1, 2),
+            ):
+                Cylinder(
+                    radius=1.8,
                     height=self.plate_thickness,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT,
