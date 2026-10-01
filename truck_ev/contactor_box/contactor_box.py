@@ -241,6 +241,7 @@ class MountingPlate(BasePartObject):
         mbox = contactor_box.mbox
         blank_face = mbox.interior_bottom_face.without_holes()
         base_z = mbox.standoff_faces[0].center_location.position.Z
+        intersect_rect = Rectangle(20, 1.7 * 2, mode=Mode.PRIVATE)
         with BuildPart() as p:
             with BuildSketch(Plane.XY.offset(base_z)):
                 offset(
@@ -273,12 +274,28 @@ class MountingPlate(BasePartObject):
             extrude(amount=plate_thickness, mode=Mode.SUBTRACT)
             if plate_sunk_depth > 0:
                 with BuildSketch(Plane.XY.offset(base_z)):
+                    insert(
+                        [
+                            offset(
+                                copy(face),
+                                amount=plate_edge_fit / 2,
+                                mode=Mode.PRIVATE,
+                            )
+                            & (face.center_location * intersect_rect)
+                            for face in (
+                                contactor_box.standoff_cutout_faces.faces()
+                            )
+                        ]
+                    )
+                extrude(amount=plate_sunk_depth, mode=Mode.SUBTRACT)
+
+                with BuildSketch(Plane.XY.offset(base_z)):
                     offset(
                         contactor_box.standoff_cutout_faces,
                         amount=plate_edge_fit / 2,
                         mode=Mode.ADD,
                     )
-                extrude(amount=plate_sunk_depth, mode=Mode.SUBTRACT)
+                extrude(amount=plate_sunk_depth - 0.4, mode=Mode.SUBTRACT)
 
             face = p.faces().filter_by(Plane.XY).sort_by(Axis.Z)[-1]
             RigidJoint(
