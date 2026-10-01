@@ -58,6 +58,7 @@ class Assets:
     FUSE_BLOCK = DIR / "ETI_D02.step"
     FUSE_HOLDER = DIR / "fuse-holder.step"
     DIN_RAIL = DIR / "dinr135-010.step"
+    SHUNT = DIR / "RSB-600-50-reexported.step"
 
 
 class ManufacturerBox(Compound):
@@ -288,9 +289,12 @@ class MountingPlate(BasePartObject):
             RigidJoint(
                 "contactor_attach", joint_location=face.location_at(0.25, 0.25)
             )
+            fuse_block_location = face.location_at(0.75, 0.5)
+            fuse_block_location.orientation = (0, 0, 90)
+            RigidJoint("fuse_block_attach", joint_location=fuse_block_location)
             RigidJoint(
-                "fuse_block_attach",
-                joint_location=face.location_at(0.75, 0.75),
+                "shunt_attach",
+                joint_location=face.location_at(0.25, 0.75),
             )
         if not p.part:
             raise RuntimeError("Empty part")
@@ -404,6 +408,23 @@ class FuseBlock(Compound):
         return imported_model
 
 
+class Shunt(Compound):
+    mounting_hole_separation = 31.75 * MM
+
+    def __init__(self) -> None:
+        imported = self._import()
+        super().__init__(children=imported.children, label=imported.label)
+        RigidJoint("center", self, joint_location=Location())
+
+    def _import(self) -> Compound:
+        imported_model = import_step(Assets.SHUNT)
+        imported_model.children = (
+            solid.transformed(rotate=(90, 0, 0), offset=(0, 0, 0))
+            for solid in imported_model.children
+        )
+        return imported_model
+
+
 class ContactorBoxAssembly(Model):
     print_test: bool = False
     simple: bool = False
@@ -424,6 +445,9 @@ class ContactorBoxAssembly(Model):
         self.mounting_plate.joints["fuse_block_attach"].connect_to(
             self.fuse_block.joints["din_rail_center"]
         )
+        self.mounting_plate.joints["shunt_attach"].connect_to(
+            self.shunt.joints["center"]
+        )
         return [self.contactor_box, self.mounting_plate, self.components]
 
     @cached_property
@@ -436,9 +460,14 @@ class ContactorBoxAssembly(Model):
         return FuseBlock()
 
     @cached_property
+    def shunt(self) -> Shunt:
+        return Shunt()
+
+    @cached_property
     def components(self) -> Compound:
         return Compound(
-            children=[self.contactor, self.fuse_block], label="Components"
+            children=[self.contactor, self.fuse_block, self.shunt],
+            label="Components",
         )
 
     @cached_property
@@ -457,6 +486,7 @@ class ContactorBoxAssembly(Model):
             )
             for joint in mp.joints.values():
                 RigidJoint(joint.label, joint_location=joint.location)
+
             with (
                 Locations(mp.joints["contactor_attach"].location),
                 GridLocations(
@@ -465,6 +495,28 @@ class ContactorBoxAssembly(Model):
             ):
                 Cylinder(
                     radius=3,
+                    height=self.plate_thickness,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT,
+                )
+
+            with (
+                Locations(mp.joints["fuse_block_attach"].location),
+                Locations(Rot(0, 0, 0), Rot(0, 0, 90)),
+                GridLocations(25 * MM, 0, 4, 1),
+            ):
+                Cylinder(
+                    radius=3.1,
+                    height=self.plate_thickness,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT,
+                )
+            with (
+                Locations(mp.joints["shunt_attach"].location),
+                GridLocations(0, self.shunt.mounting_hole_separation, 1, 2),
+            ):
+                Cylinder(
+                    radius=2.55,
                     height=self.plate_thickness,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT,
