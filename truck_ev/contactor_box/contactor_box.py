@@ -59,6 +59,7 @@ class Assets:
     FUSE_HOLDER = DIR / "fuse-holder.step"
     DIN_RAIL = DIR / "dinr135-010.step"
     SHUNT = DIR / "RSB-600-50-reexported.step"
+    RELAY = DIR / "T9AP1D52-12.step"
 
 
 class ManufacturerBox(Compound):
@@ -296,6 +297,9 @@ class MountingPlate(BasePartObject):
                 "shunt_attach",
                 joint_location=face.location_at(0.25, 0.75),
             )
+            relay_location = face.location_at(0.375, 0.5)
+            relay_location.orientation = (0, 0, 90)
+            RigidJoint("relay_attach", joint_location=relay_location)
         if not p.part:
             raise RuntimeError("Empty part")
         p.part.label = type(self).__name__
@@ -425,6 +429,21 @@ class Shunt(Compound):
         return imported_model
 
 
+class Relay(Compound):
+    def __init__(self) -> None:
+        imported = self._import()
+        super().__init__(children=imported.children, label=imported.label)
+        RigidJoint("center", self, joint_location=Location())
+
+    def _import(self) -> Compound:
+        imported_model = import_step(Assets.RELAY)
+        imported_model.color = Color(0x222222, 0xFF)
+        bbox = imported_model.bounding_box()
+        return Compound(
+            children=[imported_model.transformed(offset=(0, 0, -bbox.min.Z))]
+        )
+
+
 class ContactorBoxAssembly(Model):
     print_test: bool = False
     simple: bool = False
@@ -448,6 +467,9 @@ class ContactorBoxAssembly(Model):
         self.mounting_plate.joints["shunt_attach"].connect_to(
             self.shunt.joints["center"]
         )
+        self.mounting_plate.joints["relay_attach"].connect_to(
+            self.relay.joints["center"]
+        )
         return [self.contactor_box, self.mounting_plate, self.components]
 
     @cached_property
@@ -464,9 +486,13 @@ class ContactorBoxAssembly(Model):
         return Shunt()
 
     @cached_property
+    def relay(self) -> Compound:
+        return Relay()
+
+    @cached_property
     def components(self) -> Compound:
         return Compound(
-            children=[self.contactor, self.fuse_block, self.shunt],
+            children=[self.contactor, self.fuse_block, self.shunt, self.relay],
             label="Components",
         )
 
