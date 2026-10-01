@@ -58,6 +58,7 @@ class Assets:
     FUSE_BLOCK = DIR / "ETI_D02.step"
     FUSE_HOLDER = DIR / "fuse-holder.step"
     DIN_RAIL = DIR / "dinr135-010.step"
+    SHUNT = DIR / "RSB-600-50-reexported.step"
 
 
 class ManufacturerBox(Compound):
@@ -291,6 +292,10 @@ class MountingPlate(BasePartObject):
             fuse_block_location = face.location_at(0.75, 0.5)
             fuse_block_location.orientation = (0, 0, 90)
             RigidJoint("fuse_block_attach", joint_location=fuse_block_location)
+            RigidJoint(
+                "shunt_attach",
+                joint_location=face.location_at(0.25, 0.75),
+            )
         if not p.part:
             raise RuntimeError("Empty part")
         p.part.label = type(self).__name__
@@ -403,6 +408,21 @@ class FuseBlock(Compound):
         return imported_model
 
 
+class Shunt(Compound):
+    def __init__(self) -> None:
+        imported = self._import()
+        super().__init__(children=imported.children, label=imported.label)
+        RigidJoint("center", self, joint_location=Location())
+
+    def _import(self) -> Compound:
+        imported_model = import_step(Assets.SHUNT)
+        imported_model.children = (
+            solid.transformed(rotate=(90, 0, 0), offset=(0, 0, 0))
+            for solid in imported_model.children
+        )
+        return imported_model
+
+
 class ContactorBoxAssembly(Model):
     print_test: bool = False
     simple: bool = False
@@ -423,6 +443,9 @@ class ContactorBoxAssembly(Model):
         self.mounting_plate.joints["fuse_block_attach"].connect_to(
             self.fuse_block.joints["din_rail_center"]
         )
+        self.mounting_plate.joints["shunt_attach"].connect_to(
+            self.shunt.joints["center"]
+        )
         return [self.contactor_box, self.mounting_plate, self.components]
 
     @cached_property
@@ -435,9 +458,14 @@ class ContactorBoxAssembly(Model):
         return FuseBlock()
 
     @cached_property
+    def shunt(self) -> Compound:
+        return Shunt()
+
+    @cached_property
     def components(self) -> Compound:
         return Compound(
-            children=[self.contactor, self.fuse_block], label="Components"
+            children=[self.contactor, self.fuse_block, self.shunt],
+            label="Components",
         )
 
     @cached_property
