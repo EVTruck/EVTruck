@@ -6,7 +6,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bdbox import Model, show
+from bdbox import Model
 from build123d import (
     MM,
     Align,
@@ -21,10 +21,8 @@ from build123d import (
     Face,
     GeomType,
     GridLocations,
-    Joint,
     Kind,
     Location,
-    LocationList,
     Locations,
     Mode,
     Part,
@@ -48,24 +46,6 @@ from build123d import (
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
-
-
-def show_loc(
-    loc: Location | Plane | Joint | LocationList, label: str | None = None
-) -> None:
-    def _show(loc: Location, label: str | None = None) -> None:
-        symbol = Compound.make_triad(axes_scale=10).move(loc)
-        symbol.label = label or ""
-        show(symbol)
-
-    label = label or f"{type(loc).__name__}: {loc}"
-    if isinstance(loc, LocationList):
-        for single_loc in loc:
-            _show(single_loc, label)
-    elif isinstance(loc, Joint | Plane):
-        _show(loc.location, label)
-    else:
-        _show(loc, label)
 
 
 class Assets:
