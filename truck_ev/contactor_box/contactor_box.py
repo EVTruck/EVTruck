@@ -470,6 +470,17 @@ class ContactorBoxAssembly(Model):
                     mode=Mode.SUBTRACT,
                 )
 
+            with (
+                Locations(mp.joints["fuse_block_attach"].location),
+                Locations(Rot(0, 0, 0), Rot(0, 0, 90)),
+                GridLocations(25 * MM, 0, 4, 1),
+            ):
+                Cylinder(
+                    radius=3.1,
+                    height=self.plate_thickness,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT,
+                )
         if not p.part:
             raise RuntimeError("empty part")
         p.part.label = mp.label
