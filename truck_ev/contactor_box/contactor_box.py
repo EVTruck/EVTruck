@@ -409,6 +409,8 @@ class FuseBlock(Compound):
 
 
 class Shunt(Compound):
+    mounting_hole_separation = 31.75 * MM
+
     def __init__(self) -> None:
         imported = self._import()
         super().__init__(children=imported.children, label=imported.label)
@@ -458,7 +460,7 @@ class ContactorBoxAssembly(Model):
         return FuseBlock()
 
     @cached_property
-    def shunt(self) -> Compound:
+    def shunt(self) -> Shunt:
         return Shunt()
 
     @cached_property
@@ -484,6 +486,7 @@ class ContactorBoxAssembly(Model):
             )
             for joint in mp.joints.values():
                 RigidJoint(joint.label, joint_location=joint.location)
+
             with (
                 Locations(mp.joints["contactor_attach"].location),
                 GridLocations(
@@ -508,6 +511,17 @@ class ContactorBoxAssembly(Model):
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT,
                 )
+            with (
+                Locations(mp.joints["shunt_attach"].location),
+                GridLocations(0, self.shunt.mounting_hole_separation, 1, 2),
+            ):
+                Cylinder(
+                    radius=2.55,
+                    height=self.plate_thickness,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT,
+                )
+
         if not p.part:
             raise RuntimeError("empty part")
         p.part.label = mp.label
