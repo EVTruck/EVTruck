@@ -288,10 +288,9 @@ class MountingPlate(BasePartObject):
             RigidJoint(
                 "contactor_attach", joint_location=face.location_at(0.25, 0.25)
             )
-            RigidJoint(
-                "fuse_block_attach",
-                joint_location=face.location_at(0.75, 0.75),
-            )
+            fuse_block_location = face.location_at(0.75, 0.5)
+            fuse_block_location.orientation = (0, 0, 90)
+            RigidJoint("fuse_block_attach", joint_location=fuse_block_location)
         if not p.part:
             raise RuntimeError("Empty part")
         p.part.label = type(self).__name__
