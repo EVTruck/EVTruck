@@ -1,5 +1,5 @@
-import truck_ev
+import evtruck
 
 
 def test_version() -> None:
-    assert truck_ev.version
+    assert evtruck.version

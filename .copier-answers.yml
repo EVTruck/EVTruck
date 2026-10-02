@@ -15,7 +15,7 @@ enable_pypi: false
 github_user: smkent
 project_description: Truck EV conversion bits and parts
 project_name: cad
-project_slug: truck_ev
+project_slug: evtruck
 project_type: application
 project_visibility: public
 python_version_maximum: No maximum
