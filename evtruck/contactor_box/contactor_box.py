@@ -303,17 +303,17 @@ class MountingPlate(BasePartObject):
                 .offset(-plate_sunk_depth)
                 .location,
             )
-            RigidJoint(
-                "contactor_attach", joint_location=face.location_at(0.25, 0.25)
-            )
-            fuse_block_location = face.location_at(0.75, 0.5)
-            fuse_block_location.orientation = (0, 0, 90)
+            contactor_location = face.location_at(0.5, 0.23)
+            contactor_location.orientation = (0, 0, 180 - 22.5)
+            RigidJoint("contactor_attach", joint_location=contactor_location)
+            fuse_block_location = face.location_at(0.77, 0.5)
+            fuse_block_location.orientation = (0, 0, 180)
             RigidJoint("fuse_block_attach", joint_location=fuse_block_location)
             RigidJoint(
                 "shunt_attach",
-                joint_location=face.location_at(0.25, 0.75),
+                joint_location=face.location_at(0.23, 0.75),
             )
-            relay_location = face.location_at(0.375, 0.5)
+            relay_location = face.location_at(0.15, 0.5)
             relay_location.orientation = (0, 0, 90)
             RigidJoint("relay_attach", joint_location=relay_location)
         if not p.part:
