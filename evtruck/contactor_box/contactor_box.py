@@ -55,6 +55,7 @@ class Assets:
     CONTACTOR = DIR / (
         "sensata-gigavac-gv200-series-open-contactors-drawing-updated.step"
     )
+    CONTACTOR_12V = DIR / "TE-LEV100A4ANG.step"
     FUSE_HOLDER = DIR / "fuse-holder.step"
     DIN_RAIL = DIR / "dinr135-010.step"
     SHUNT = DIR / "RSB-600-50-reexported.step"
@@ -306,6 +307,11 @@ class MountingPlate(BasePartObject):
             contactor_location = face.location_at(0.5, 0.23)
             contactor_location.orientation = (0, 0, 180 - 22.5)
             RigidJoint("contactor_attach", joint_location=contactor_location)
+            contactor_12v_location = face.location_at(0.4, 0.5)
+            contactor_12v_location.orientation = (0, 0, 180)
+            RigidJoint(
+                "contactor_12v_attach", joint_location=contactor_12v_location
+            )
             fuse_block_location = face.location_at(0.77, 0.5)
             fuse_block_location.orientation = (0, 0, 180)
             RigidJoint("fuse_block_attach", joint_location=fuse_block_location)
@@ -382,6 +388,22 @@ class GigavacGV200Contactor(Compound):
             if part not in exclude_parts
         )
         return assembly
+
+
+class TE12VContactor(Compound):
+    mounting_hole_separation = 46.32 * MM
+
+    def __init__(self) -> None:
+        imported = self._import()
+        super().__init__(children=imported.children, label=imported.label)
+        RigidJoint("center", self, joint_location=Location())
+
+    def _import(self) -> Compound:
+        imported_model = import_step(Assets.CONTACTOR_12V).transformed(
+            rotate=(180, 0, 0)
+        )
+        imported_model.color = Color(0xBBBBBB, 0xFF)
+        return Compound(children=[imported_model], label="TE-LEV100A4ANG")
 
 
 class FuseBlock(Compound):
@@ -479,6 +501,9 @@ class ContactorBoxAssembly(Model):
         self.mounting_plate.joints["contactor_attach"].connect_to(
             self.contactor.joints["housing"]
         )
+        self.mounting_plate.joints["contactor_12v_attach"].connect_to(
+            self.contactor_12v.joints["center"]
+        )
         self.mounting_plate.joints["fuse_block_attach"].connect_to(
             self.fuse_block.joints["din_rail_center"]
         )
@@ -496,6 +521,10 @@ class ContactorBoxAssembly(Model):
         return part.simple if self.simple else part
 
     @cached_property
+    def contactor_12v(self) -> TE12VContactor:
+        return TE12VContactor()
+
+    @cached_property
     def fuse_block(self) -> Compound:
         return FuseBlock()
 
@@ -510,7 +539,13 @@ class ContactorBoxAssembly(Model):
     @cached_property
     def components(self) -> Compound:
         return Compound(
-            children=[self.contactor, self.fuse_block, self.shunt, self.relay],
+            children=[
+                self.contactor,
+                self.contactor_12v,
+                self.fuse_block,
+                self.shunt,
+                self.relay,
+            ],
             label="Components",
         )
 
