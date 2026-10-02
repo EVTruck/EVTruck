@@ -55,7 +55,6 @@ class Assets:
     CONTACTOR = DIR / (
         "sensata-gigavac-gv200-series-open-contactors-drawing-updated.step"
     )
-    FUSE_BLOCK = DIR / "ETI_D02.step"
     FUSE_HOLDER = DIR / "fuse-holder.step"
     DIN_RAIL = DIR / "dinr135-010.step"
     SHUNT = DIR / "RSB-600-50-reexported.step"
