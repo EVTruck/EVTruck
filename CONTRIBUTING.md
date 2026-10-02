@@ -1,9 +1,9 @@
-# Contributing to truck-ev
+# Contributing to cad
 
 **Contributions are welcome!**
 
 Thank you for your time and interest in improving
-**truck-ev**!
+**cad**!
 
 ## Project resources
 
@@ -40,7 +40,7 @@ Thank you for your time and interest in improving
 
 ```sh
 git clone https://github.com/EVTruck/cad
-cd truck-ev
+cd cad
 ```
 
 Run `mise install` in new repository clones to install tools, dependencies, and
