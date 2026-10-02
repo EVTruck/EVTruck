@@ -3324,7 +3324,7 @@ wheels = [
 ]
 
 [[package]]
-name = "truck-ev"
+name = "evtruck"
 source = { editable = "." }
 dependencies = [
     { name = "bdbox" },
