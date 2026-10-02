@@ -2,10 +2,10 @@
 
 Truck EV conversion bits and parts
 
-[![License](https://img.shields.io/github/license/smkent/truck-ev)](https://github.com/smkent/truck-ev/blob/main/LICENSE)
-[![CI](https://github.com/smkent/truck-ev/actions/workflows/ci.yaml/badge.svg)](https://github.com/smkent/truck-ev/actions/workflows/ci.yaml)
+[![License](https://img.shields.io/github/license/EVTruck/cad)](https://github.com/EVTruck/cad/blob/main/LICENSE)
+[![CI](https://github.com/EVTruck/cad/actions/workflows/ci.yaml/badge.svg)](https://github.com/EVTruck/cad/actions/workflows/ci.yaml)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovatebot)](https://renovatebot.com)
-[![GitHub stars](https://img.shields.io/github/stars/smkent/truck-ev?style=social)](https://github.com/smkent/truck-ev)
+[![GitHub stars](https://img.shields.io/github/stars/EVTruck/cad?style=social)](https://github.com/EVTruck/cad)
 
 ## Project template
 
