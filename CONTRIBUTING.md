@@ -7,9 +7,9 @@ Thank you for your time and interest in improving
 
 ## Project resources
 
-* **Repository**: <https://github.com/smkent/truck-ev>
+* **Repository**: <https://github.com/EVTruck/cad>
   for submitting pull requests
-* **Issue tracker**: <https://github.com/smkent/truck-ev/issues>
+* **Issue tracker**: <https://github.com/EVTruck/cad/issues>
   for questions or bug reports
 
 ## Development documentation
@@ -39,7 +39,7 @@ Thank you for your time and interest in improving
 #### Cloning the repository
 
 ```sh
-git clone https://github.com/smkent/truck-ev
+git clone https://github.com/EVTruck/cad
 cd truck-ev
 ```
 
