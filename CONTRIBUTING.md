@@ -1,15 +1,15 @@
-# Contributing to cad
+# Contributing to EVTruck
 
 **Contributions are welcome!**
 
 Thank you for your time and interest in improving
-**cad**!
+**EVTruck**!
 
 ## Project resources
 
-* **Repository**: <https://github.com/EVTruck/cad>
+* **Repository**: <https://github.com/EVTruck/EVTruck>
   for submitting pull requests
-* **Issue tracker**: <https://github.com/EVTruck/cad/issues>
+* **Issue tracker**: <https://github.com/EVTruck/EVTruck/issues>
   for questions or bug reports
 
 ## Development documentation
@@ -39,8 +39,8 @@ Thank you for your time and interest in improving
 #### Cloning the repository
 
 ```sh
-git clone https://github.com/EVTruck/cad
-cd cad
+git clone https://github.com/EVTruck/EVTruck
+cd EVTruck
 ```
 
 Run `mise install` in new repository clones to install tools, dependencies, and
