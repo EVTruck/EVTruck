@@ -7,8 +7,8 @@ name = "evtruck"
 dynamic = ["version"]
 description = "Truck EV conversion bits and parts"
 readme = "README.md"
-license = "LGPL-3.0"
-license-files = ["LICENSE"]
+license = "LGPL-3.0-only"
+license-files = ["COPYING", "COPYING.LESSER"]
 requires-python = ">=3.10"
 authors = [{ name = "Stephen Kent", email = "smkent@smkent.net" }]
 classifiers = [
@@ -55,7 +55,7 @@ tag_message = ""
 push = true
 
 [tool.hatch.build.targets.sdist]
-include = ["/evtruck", "/tests", "*.md", "LICENSE"]
+include = ["/evtruck", "/tests", "*.md", "COPYING", "COPYING.LESSER"]
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
