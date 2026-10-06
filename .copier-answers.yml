@@ -12,7 +12,7 @@ enable_features:
 - syrupy
 - xdist
 enable_pypi: false
-github_user: smkent
+github_user: EVTruck
 project_description: Truck EV conversion bits and parts
 project_name: EVTruck
 project_slug: evtruck
