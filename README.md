@@ -11,8 +11,8 @@ Truck EV conversion bits and parts
 
 Copyright (C) 2026 Stephen Kent and contributors
 
-Licensed under the GNU Lesser General Public License v3.0 only
-([`LGPL-3.0-only`](https://github.com/EVTruck/EVTruck/blob/main/COPYING.LESSER)).
+Licensed under the GNU Lesser General Public License v3.0 or later
+([`LGPL-3.0-or-later`](https://github.com/EVTruck/EVTruck/blob/main/COPYING.LESSER)).
 
 ## Project template
 
