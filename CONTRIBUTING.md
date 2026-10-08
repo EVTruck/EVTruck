@@ -12,6 +12,14 @@ Thank you for your time and interest in improving
 * **Issue tracker**: <https://github.com/EVTruck/EVTruck/issues>
   for questions or bug reports
 
+## Contribution terms
+
+By submitting a contribution to EVTruck, you agree that it is
+licensed under the project's license, the
+[GNU Lesser General Public License v3.0 or later](https://github.com/EVTruck/EVTruck/blob/main/COPYING.LESSER),
+with no additional terms,
+and that you have the right to submit it under that license.
+
 ## Development documentation
 
 ### Prerequisites
