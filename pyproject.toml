@@ -9,7 +9,7 @@ description = "Truck EV conversion bits and parts"
 readme = "README.md"
 license = "LGPL-3.0-or-later"
 license-files = ["COPYING", "COPYING.LESSER"]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.15"
 authors = [{ name = "Stephen Kent", email = "smkent@smkent.net" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
