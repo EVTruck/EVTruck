@@ -20,6 +20,12 @@ licensed under the project's license, the
 with no additional terms,
 and that you have the right to submit it under that license.
 
+## LLM use
+
+A contributor is always the author of their contributions.
+You must read, review, and understand everything you submit, including
+LLM-generated code or text, and be able to explain it on request.
+
 ## Development documentation
 
 ### Prerequisites
