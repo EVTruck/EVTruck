@@ -9,14 +9,13 @@ description = "Truck EV conversion bits and parts"
 readme = "README.md"
 license = "LGPL-3.0-or-later"
 license-files = ["COPYING", "COPYING.LESSER"]
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.11,<3.15"
 authors = [{ name = "Stephen Kent", email = "smkent@smkent.net" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -101,7 +100,7 @@ exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "@abstractmethod"]
 [tool.ruff]
 line-length = 79
 output-format = "concise"
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["ALL"]
