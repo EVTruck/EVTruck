@@ -1,15 +1,16 @@
-# Sealed BMS satellite enclosure and port plug
+# Sealed BMS satellite enclosure
 
-Each battery box has a square port that was cut for the Amphenol 350 A sealed
-power receptacle (sold by ampREVOLT). These two 3D-printed parts use that port
-to bring the BMSS24 satellite's wiring out of the box, and keep the bare board
-dry in its own sealed enclosure.
+Each battery box has a square pocket on its outer wall that was cut for an
+Amphenol SurLok Plus receptacle (sold by ampREVOLT). The satellite enclosure
+clamps onto the wall over that pocket, and a printed flange clamps on from
+the inside, so the bare BMSS24 board stays dry and its wiring passes straight
+into the battery box.
 
 Models (build123d + bdbox):
 
-- `evtruck/bms_satellite/port_plug.py`: `PortPlug`, presets `fit-test` and `single-seal`
-- `evtruck/bms_satellite/enclosure.py`: `SatelliteEnclosure`, preset `print`
-- `evtruck/bms_satellite/coupling.py`: spigot and socket sizes both parts share
+- `evtruck/bms_satellite/enclosure.py`: `SatelliteEnclosure`, presets `print` and `one-connector`
+- `evtruck/bms_satellite/port_flange.py`: `PortFlange` (inner flange), preset `template` (drilling template)
+- `evtruck/bms_satellite/port_interface.py`: hole, screw and o-ring sizes both sides share
 
 Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for every preset).
 
@@ -17,37 +18,38 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
 
 ```
         lid ── 2 mm o-ring cord in the wall rim groove
- ┌───────────────────────────────┐
- │ bay │   BMSS24 board          │   enclosure
- │ ┌─┐ │                         │◄── two M12 4-pin panel connectors (isoSPI in, out)
- └─┤ ├─┴─────────────────────────┘
-   │ │ ◄── socket over the spigot, two 20 x 2 mm o-rings
- ══╧═╧══ port plug flange (four M4 flat head screws)
-   █ █  ◄── square body in the port, two 2 mm o-ring cords (radial seal)
- battery box wall
+ ┌──────────────────────────────────┐
+ │  bay  │   BMSS24 board           │◄── two M12 4-pin connectors (isoSPI in, out)
+ └─┬───┬─┴──────────────────────────┘
+   │pad│ ◄── 52 x 2 mm o-ring on the wall face, M4 heat-set inserts
+ ══╛   ╘══ battery box wall (pocket + 25 mm wire hole)
+   ╒═══╕ ◄── inner flange, 44 x 2 mm o-ring on the inside face
+     ▲ four M4 socket head screws from inside the box
 ```
 
-1. **Port to plug:** two o-ring cords in grooves around the square body seal
-   against the port walls. This is a radial seal, so the flange doesn't need to
-   be flat against the plate. A 2 mm cord bends tightly around the port's
-   corners, so put a little silicone grease on it and check it with the
-   fit-test print. If the port is less than 9.5 mm deep, use the
-   `single-seal` preset.
-2. **Plug to enclosure:** two 20 x 2 mm o-rings on a round 24 mm spigot. This
-   is a round piston seal, which is the most reliable o-ring joint you can
-   print. Two M3 screws into heat-set inserts in the plug hold the enclosure
-   down. Put sealing washers under their heads, because these holes are inside
-   the box.
-3. **Lid:** a 2 mm o-ring cord in a groove on the wall rim. The ten M3 lid
+1. **Outside:** a round pad under the enclosure's wiring bay sits on the wall
+   face. The 52 x 2 mm o-ring in its face goes around the whole pocket.
+2. **Inside:** the printed flange sits on the inner face of the wall, with a
+   44 x 2 mm o-ring around the wire hole and screws.
+3. **Screws:** four M4 socket head screws go through the flange and the wall
+   into heat-set inserts in the pad. They're inside both o-rings, so their
+   holes stay dry and need no extra sealing. Screw length is the flange
+   (2 mm under the head), plus the wall, plus up to 8 mm into the inserts.
+4. **Lid:** a 2 mm o-ring cord in a groove on the wall rim. The ten M3 lid
    screws go into bosses outside the seal.
-4. **Wires:** pot the plug's 14 mm wire bore with epoxy after the cell-tap and
-   thermistor wires are pulled through. Then the enclosure doesn't share air
-   or moisture with the battery box, and the wires get strain relief.
-5. **Mounting screws:** the port has no mounting holes yet. Print the
-   `fit-test` preset, push it into the port, and drill the four M4 holes
-   through it. These holes are outside the port seal, so either tap them M4
-   and use thread sealant (no nuts inside the box), or put bonded sealing
-   washers on the nuts.
+5. **Wires:** the 25 mm wire hole passes the 14-pin cell-tap plugs, so
+   pre-made harnesses thread through.
+
+## Cutting the wall
+
+The pocket isn't cut all the way through. Print the `template` preset: a
+disc the size of the pad, with a square nub that drops into the pocket.
+
+1. Check that the disc sits flat with nothing under it. The pad covers a
+   64 mm circle centered on the pocket.
+2. Drill the four 4.5 mm screw holes through the template.
+3. Mark the 25 mm wire hole, then cut it with a hole saw or step drill.
+   Deburr it, because the wires pass over its edge.
 
 ## isoSPI connectors
 
@@ -67,23 +69,23 @@ the cables have to be a branched harness.
 ## Print notes
 
 - Use PETG or ASA, with 4+ perimeters and 100% infill around the grooves and
-  the socket. PLA softens too easily in a vehicle.
-- Print the plug standing on the square body, with supports under the flange.
-- Print the enclosure upright and the lid flat (the `print` preset lays them out).
-- Use M3 heat-set inserts 4.0 mm OD x 5.7 mm long.
+  the inserts. PLA softens too easily in a vehicle.
+- Print the enclosure upright on its pad, with supports under the floor (the
+  `print` preset lays out the body and the lid).
+- Print the flange groove-side up.
+- Inserts: M3 heat-set inserts 4.0 mm OD x 5.7 mm long for the lid and
+  board. M4 inserts 5.7 mm OD x 8 mm long for the wall screws.
 
-## Measurements still needed
+## Measurements
 
-The port defaults were estimated from photos. Check them before printing
-anything but the fit test. The board sizes were measured from ruler photos on
-2026-10-15 (about ±1 mm), with an 11 mm overall thickness confirmed by hand.
+The board sizes were measured from ruler photos on 2026-10-15 (about ±1 mm),
+with an 11 mm overall thickness confirmed by hand. The pocket is about 35 mm
+square.
 
-| Parameter | Default | What to measure |
+| Parameter | Value | Notes |
 |---|---|---|
-| `port_width`, `port_height` | 38 mm | Port opening |
-| `port_corner_radius` | 3 mm | Corner radius of the opening |
-| `port_depth` | 10 mm | Plate thickness at the port, and whether the port goes all the way through |
-| `mount_hole_pattern` | 50 mm square | Not measured: you drill these. Check that a 61 mm square flange clears nearby screw heads |
-| `board_length`, `board_width` | 100 x 74 mm (measured) | PCB outline; connectors add about 10 mm overall |
-| `board_hole_spacing_length`, `_width` | 52 x 62 mm (measured) | Mounting hole pattern (four plated M3 holes) |
-| `component_height` | 10 mm (measured) | Tallest part above the PCB |
+| `PortInterface.pocket_size` | 35 mm | The outer o-ring must clear the pocket's corners |
+| `PortInterface.wall_thickness` | 8 mm | Assembly view only; sets the screw length |
+| `board_length`, `board_width` | 100 x 74 mm | PCB outline; connectors add about 10 mm overall |
+| `board_hole_spacing_length`, `_width` | 52 x 62 mm | Four plated M3 holes |
+| `component_height` | 10 mm | Tallest part above the PCB |

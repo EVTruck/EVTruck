@@ -1,10 +1,11 @@
 """Sealed enclosure for a bare Dilithium BMSS24 satellite board.
 
 The board comes out of its Serpac WM031 case and mounts on standoffs in
-this box. The enclosure sits on the port plug (see ``port_plug.py``): a
-socket in its floor slides over the plug's double o-ring spigot and two M3
-screws hold it down. The cell-tap and thermistor wires come up through the
-spigot into a wiring bay at one end.
+this box. A round pad under the wiring bay clamps against the outside of the
+battery box wall, with an o-ring in its face and four M4 heat-set inserts
+for the screws from the inner flange (see ``port_interface.py`` and
+``port_flange.py``). The cell-tap and thermistor wires come up through the
+wire hole into the bay.
 
 Sealed 4-pin panel connectors on the far end wall carry the isoSPI daisy
 chain. By default there are two, one for the pair in (IPI/IMI) and one for
@@ -15,8 +16,8 @@ fit M12 A-coded panel receptacles with an M16 x 1.5 rear thread.
 The lid seals on a 2 mm o-ring cord in a groove on the wall rim. The lid
 screws are in bosses outside the seal.
 
-Coordinates: Z = 0 is the enclosure floor's underside, which rests on the
-plug pedestal. The socket axis is the Z axis.
+Coordinates: Z = 0 is the enclosure floor's underside. The pad hangs below
+it, and the wire hole is on the Z axis.
 """
 
 from __future__ import annotations
@@ -25,14 +26,12 @@ from bdbox import Model, Preset
 from build123d import (
     MM,
     Align,
-    Axis,
     Box,
     BuildPart,
     BuildSketch,
     Circle,
     Color,
     Cylinder,
-    GeomType,
     Locations,
     Mode,
     Part,
@@ -40,12 +39,15 @@ from build123d import (
     Pos,
     RectangleRounded,
     Rot,
-    chamfer,
     extrude,
 )
 
-from .coupling import Coupling
-from .port_plug import PortPlug
+from .port_flange import PortFlange
+from .port_interface import PortInterface as Port
+
+M3_INSERT_HOLE_DIAMETER = 4.0 * MM  # M3 heat-set insert
+M3_INSERT_HOLE_DEPTH = 6 * MM
+M3_CLEARANCE_DIAMETER = 3.4 * MM
 
 
 class SatelliteEnclosure(Model):
@@ -59,11 +61,12 @@ class SatelliteEnclosure(Model):
     board_hole_spacing_width: float = 62 * MM
     board_hole_offset: float = -3.5 * MM  # Hole pattern shift toward the bay
     component_height: float = 10 * MM  # 11 mm overall with the PCB
-    standoff_height: float = 18 * MM  # Lifts the plugs over the socket tube
+    standoff_height: float = 8 * MM
     side_clearance: float = 18 * MM  # Thermistor plugs and wire bends
     end_clearance: float = 25 * MM  # isoSPI plugs at the far end
 
-    bay_length: float = 40 * MM  # Wiring bay over the socket
+    bay_length: float = 56 * MM  # Wiring bay over the wall pad
+    pad_height: float = 6.5 * MM  # Floor clearance off the battery box wall
     wall_thickness: float = 4.5 * MM
     floor_thickness: float = 3 * MM
     inner_corner_radius: float = 2 * MM
@@ -79,7 +82,7 @@ class SatelliteEnclosure(Model):
     connector_spacing: float = 30 * MM
 
     printable: bool = False  # Body and lid only, laid out for printing
-    show_plug: bool = True
+    show_flange: bool = True
 
     presets = (
         Preset(
@@ -98,32 +101,35 @@ class SatelliteEnclosure(Model):
         if self.printable:
             return self.print_layout
         geometry = [self.body, self.lid, self.board]
-        if self.show_plug:
-            geometry.append(self.placed_plug)
+        if self.show_flange:
+            geometry.append(self.placed_flange)
         return geometry
 
     @property
     def print_layout(self) -> list[Part]:
-        """Body upright and lid flipped beside it, both on the bed."""
+        """Body upright on its pad and lid flipped beside it, on the bed.
+
+        The floor overhangs the pad, so print the body with supports.
+        """
         lid = Pos(0, self.outer_width + 15 * MM, self.lid_thickness) * (
             Rot(180, 0, 0) * Pos(0, 0, -self.wall_top) * self.lid
         )
         lid.label = "Satellite enclosure lid"
-        return [self.body, lid]
+        body = Pos(0, 0, self.pad_height) * self.body
+        body.label = "Satellite enclosure"
+        return [body, lid]
 
     @property
-    def placed_plug(self) -> Part:
-        """Port plug in place under the enclosure, for reference."""
-        plug_model = PortPlug()
-        plug = (
-            Pos(
-                0, 0, -(plug_model.flange_thickness + Coupling.pedestal_height)
-            )
-            * plug_model.plug
+    def placed_flange(self) -> Part:
+        """Inner flange in place across the battery box wall, for reference."""
+        flange = (
+            Pos(0, 0, -self.pad_height - Port.wall_thickness)
+            * Rot(180, 0, 0)
+            * PortFlange().flange
         )
-        plug.label = "Port plug"
-        plug.color = Color(0x3366CC, 0x80)
-        return plug
+        flange.label = "Port flange"
+        flange.color = Color(0x3366CC, 0x80)
+        return flange
 
     @property
     def interior_length(self) -> float:
@@ -144,7 +150,7 @@ class SatelliteEnclosure(Model):
 
     @property
     def interior_x0(self) -> float:
-        # The socket sits in the middle of the wiring bay
+        # The wall pad sits in the middle of the wiring bay
         return -self.bay_length / 2
 
     @property
@@ -208,8 +214,6 @@ class SatelliteEnclosure(Model):
     def body(self) -> Part:
         wall = self.wall_thickness
         cx = self.interior_center_x
-        socket_depth = Coupling.spigot_length + 0.5 * MM
-        socket_r = Coupling.socket_diameter / 2
         with BuildPart() as p:
             # Shell
             with BuildSketch(), Locations((cx, 0)):
@@ -243,45 +247,41 @@ class SatelliteEnclosure(Model):
                     align=(Align.CENTER, Align.CENTER, Align.MIN),
                 )
 
-            # Socket tube for the plug spigot
+            # Mounting pad against the battery box wall
             Cylinder(
-                socket_r + 3 * MM,
-                socket_depth,
-                align=(Align.CENTER, Align.CENTER, Align.MIN),
+                Port.pad_diameter / 2,
+                self.pad_height,
+                align=(Align.CENTER, Align.CENTER, Align.MAX),
             )
-            Cylinder(
-                socket_r,
-                socket_depth,
-                align=(Align.CENTER, Align.CENTER, Align.MIN),
+            # Wire hole through the pad and floor
+            with BuildSketch(Plane.XY.offset(-self.pad_height)):
+                Circle(Port.wire_hole_diameter / 2)
+            extrude(
+                amount=self.pad_height + self.floor_thickness,
                 mode=Mode.SUBTRACT,
             )
-            chamfer(
-                p.edges()
-                .filter_by(GeomType.CIRCLE)
-                .filter_by_position(Axis.Z, -0.01, 0.01)
-                .filter_by(lambda e: abs(e.radius - socket_r) < 0.01),
-                Coupling.lead_in,
-            )
-
-            # Retention screw holes into the plug's heat-set inserts. Use
-            # sealing washers under the heads: these holes are inside the box.
+            # Face o-ring groove and M4 inserts for the inner flange screws
+            with BuildSketch(Plane.XY.offset(-self.pad_height)):
+                Circle(Port.outer_groove_radius + Port.groove_width / 2)
+                Circle(
+                    Port.outer_groove_radius - Port.groove_width / 2,
+                    mode=Mode.SUBTRACT,
+                )
+            extrude(amount=Port.groove_depth, mode=Mode.SUBTRACT)
             with (
-                BuildSketch(),
-                Locations(
-                    (0, Coupling.retention_screw_offset),
-                    (0, -Coupling.retention_screw_offset),
-                ),
+                BuildSketch(Plane.XY.offset(-self.pad_height)),
+                Locations(*Port.screw_locations()),
             ):
-                Circle(Coupling.screw_clearance_diameter / 2)
-            extrude(amount=self.floor_thickness, mode=Mode.SUBTRACT)
+                Circle(Port.insert_hole_diameter / 2)
+            extrude(amount=Port.insert_hole_depth, mode=Mode.SUBTRACT)
 
             # Heat-set insert holes: lid bosses and board standoffs
             with (
                 BuildSketch(Plane.XY.offset(self.wall_top)),
                 Locations(*self.lid_boss_locations),
             ):
-                Circle(Coupling.insert_hole_diameter / 2)
-            extrude(amount=-Coupling.insert_hole_depth, mode=Mode.SUBTRACT)
+                Circle(M3_INSERT_HOLE_DIAMETER / 2)
+            extrude(amount=-M3_INSERT_HOLE_DEPTH, mode=Mode.SUBTRACT)
             with (
                 BuildSketch(
                     Plane.XY.offset(
@@ -290,7 +290,7 @@ class SatelliteEnclosure(Model):
                 ),
                 Locations(*self.board_hole_locations),
             ):
-                Circle(Coupling.insert_hole_diameter / 2)
+                Circle(M3_INSERT_HOLE_DIAMETER / 2)
             extrude(amount=-5 * MM, mode=Mode.SUBTRACT)
 
             # Lid seal groove centered on the wall rim
@@ -341,7 +341,7 @@ class SatelliteEnclosure(Model):
                 BuildSketch(Plane.XY.offset(self.wall_top)),
                 Locations(*self.lid_boss_locations),
             ):
-                Circle(Coupling.screw_clearance_diameter / 2)
+                Circle(M3_CLEARANCE_DIAMETER / 2)
             extrude(amount=self.lid_thickness, mode=Mode.SUBTRACT)
         if not p.part:
             raise RuntimeError("Empty part")
