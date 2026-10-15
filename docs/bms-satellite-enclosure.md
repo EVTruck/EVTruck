@@ -33,8 +33,9 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
    44 x 2 mm o-ring around the wire hole and screws.
 3. **Screws:** four M4 socket head screws go through the flange and the wall
    into heat-set inserts in the pad. They're inside both o-rings, so their
-   holes stay dry and need no extra sealing. Screw length is the flange
-   (2 mm under the head), plus the wall, plus up to 8 mm into the inserts.
+   holes stay dry and need no extra sealing. Use M4 x 10 mm: 2 mm of flange
+   under the head plus the 2 mm wall leaves 6 mm in the inserts. M4 x 12
+   also fits but bottoms out at the end of the 8 mm insert.
 4. **Lid:** a 2 mm o-ring cord in a groove on the wall rim. The ten M3 lid
    screws go into bosses outside the seal.
 5. **Wires:** the 25 mm wire hole passes the 14-pin cell-tap plugs, so
@@ -80,12 +81,12 @@ the cables have to be a branched harness.
 
 The board sizes were measured from ruler photos on 2026-10-15 (about ±1 mm),
 with an 11 mm overall thickness confirmed by hand. The pocket is about 35 mm
-square.
+square, and the box wall is 2 mm sheet metal.
 
 | Parameter | Value | Notes |
 |---|---|---|
 | `PortInterface.pocket_size` | 35 mm | The outer o-ring must clear the pocket's corners |
-| `PortInterface.wall_thickness` | 8 mm | Assembly view only; sets the screw length |
+| `PortInterface.wall_thickness` | 2 mm | Measured; sets the screw length (M4 x 10) |
 | `board_length`, `board_width` | 100 x 74 mm | PCB outline; connectors add about 10 mm overall |
 | `board_hole_spacing_length`, `_width` | 52 x 62 mm | Four plated M3 holes |
 | `component_height` | 10 mm | Tallest part above the PCB |

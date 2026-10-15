@@ -41,8 +41,8 @@ class PortInterface:
     pad_diameter = 64 * MM  # Enclosure mounting pad, outside the box
     flange_size = 54 * MM  # Inner flange, inside the box
 
-    # Only used to place parts in the assembly view
-    wall_thickness = 8 * MM
+    # Battery box sheet metal, measured. Sets the screw length (M4 x 10).
+    wall_thickness = 2 * MM
 
     @classmethod
     def screw_locations(cls) -> list[tuple[float, float]]:
