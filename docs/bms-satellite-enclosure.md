@@ -22,7 +22,7 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
  │ ┌─┐ │                         │◄── two M12 4-pin panel connectors (isoSPI in, out)
  └─┤ ├─┴─────────────────────────┘
    │ │ ◄── socket over the spigot, two 20 x 2 mm o-rings
- ══╧═╧══ port plug flange (M4 flat head screws in the existing holes)
+ ══╧═╧══ port plug flange (four M4 flat head screws)
    █ █  ◄── square body in the port, two 2 mm o-ring cords (radial seal)
  battery box wall
 ```
@@ -43,8 +43,11 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
 4. **Wires:** pot the plug's 14 mm wire bore with epoxy after the cell-tap and
    thermistor wires are pulled through. Then the enclosure doesn't share air
    or moisture with the battery box, and the wires get strain relief.
-5. **Mounting screws:** the port's two existing holes are outside the port
-   seal. Put bonded sealing washers under the nuts inside the battery box.
+5. **Mounting screws:** the port has no mounting holes yet. Print the
+   `fit-test` preset, push it into the port, and drill the four M4 holes
+   through it. These holes are outside the port seal, so either tap them M4
+   and use thread sealant (no nuts inside the box), or put bonded sealing
+   washers on the nuts.
 
 ## isoSPI connectors
 
@@ -80,8 +83,7 @@ anything but the fit test. The board sizes were measured from ruler photos on
 | `port_width`, `port_height` | 38 mm | Port opening |
 | `port_corner_radius` | 3 mm | Corner radius of the opening |
 | `port_depth` | 10 mm | Plate thickness at the port, and whether the port goes all the way through |
-| `mount_hole_spacing` | 46 mm | Center-to-center of the two mounting holes |
-| `mount_hole_offset` | -11.5 mm | Hole centers from the port center, toward the holes |
+| `mount_hole_pattern` | 50 mm square | Not measured: you drill these. Check that a 61 mm square flange clears nearby screw heads |
 | `board_length`, `board_width` | 100 x 74 mm (measured) | PCB outline; connectors add about 10 mm overall |
 | `board_hole_spacing_length`, `_width` | 52 x 62 mm (measured) | Mounting hole pattern (four plated M3 holes) |
 | `component_height` | 10 mm (measured) | Tallest part above the PCB |

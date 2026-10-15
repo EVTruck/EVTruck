@@ -11,9 +11,10 @@ Sealing:
 * Two o-ring cords in perimeter grooves on the square body seal against the
   walls of the port (radial seal, so flange flatness doesn't matter).
 * Two o-rings on the round spigot seal into the enclosure socket.
-* M4 flat head screws go through the flange into the existing holes. Seal
-  the nuts inside the box with bonded washers, because those holes are
-  outside the port seal.
+* Four M4 flat head screws hold the flange to the plate, in holes drilled
+  around the port (the fit-test print doubles as the drilling template).
+  Those holes are outside the port seal, so tap them and use thread
+  sealant, or seal the nuts inside the box with bonded washers.
 * Pot the wire bore with epoxy after the wires are pulled through, so the
   enclosure doesn't share air with the battery box.
 """
@@ -38,7 +39,6 @@ from build123d import (
     Plane,
     Pos,
     RectangleRounded,
-    SlotCenterToCenter,
     chamfer,
     extrude,
     insert,
@@ -65,10 +65,9 @@ class PortPlug(Model):
     flange_lip: float = 5 * MM
     flange_thickness: float = 7 * MM
 
-    # Existing mounting holes: two holes on one side of the port, estimated
-    # from photos as 46 mm apart and 11.5 mm below the port center.
-    mount_hole_spacing: float = 46 * MM
-    mount_hole_offset: float = -11.5 * MM
+    # Four mounting holes on a square pattern centered on the port. The port
+    # has no holes yet, so drill them through the fit-test print.
+    mount_hole_pattern: float = 50 * MM  # Center-to-center, both directions
     mount_hole_diameter: float = 4.5 * MM  # M4 flat head screws
     mount_head_diameter: float = 8.5 * MM
     mount_boss_diameter: float = 11 * MM
@@ -79,7 +78,8 @@ class PortPlug(Model):
     presets = (
         Preset(
             "fit-test",
-            description="Thin print to check port fit and hole positions",
+            description="Thin print to check port fit; doubles as a drill"
+            " template for the mounting holes",
             fit_test=True,
         ),
         Preset(
@@ -150,17 +150,16 @@ class PortPlug(Model):
                 0.6 * MM,
             )
 
-            # Flange: a lip around the port plus a bar to the mounting holes
+            # Flange: covers the port lip and the four mounting holes
+            flange_size = max(
+                self.port_width + 2 * self.flange_lip,
+                self.port_height + 2 * self.flange_lip,
+                self.mount_hole_pattern + self.mount_boss_diameter,
+            )
             with BuildSketch(Plane.XY):
                 RectangleRounded(
-                    self.port_width + 2 * self.flange_lip,
-                    self.port_height + 2 * self.flange_lip,
-                    self.port_corner_radius + self.flange_lip,
+                    flange_size, flange_size, self.mount_boss_diameter / 2
                 )
-                with Locations((0, self.mount_hole_offset)):
-                    SlotCenterToCenter(
-                        self.mount_hole_spacing, self.mount_boss_diameter
-                    )
             extrude(amount=flange_t)
 
             if not self.fit_test:
@@ -230,12 +229,9 @@ class PortPlug(Model):
 
             # Countersunk mounting holes through the flange, with clearance
             # in the pedestal so the screw heads can be reached
+            half = self.mount_hole_pattern / 2
             mount_holes = [
-                (x, self.mount_hole_offset)
-                for x in (
-                    -self.mount_hole_spacing / 2,
-                    self.mount_hole_spacing / 2,
-                )
+                (sx * half, sy * half) for sx in (-1, 1) for sy in (-1, 1)
             ]
             if not self.fit_test:
                 with (
