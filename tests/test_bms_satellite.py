@@ -49,3 +49,10 @@ def test_coupling_o_ring_squeeze() -> None:
     gland = (Coupling.socket_diameter - Coupling.groove_root_diameter) / 2
     squeeze = 1 - gland / cross_section
     assert 0.1 < squeeze < 0.25
+
+
+@pytest.mark.parametrize("connectors", [1, 2])
+def test_enclosure_connector_holes(connectors: int) -> None:
+    enclosure = SatelliteEnclosure(isospi_connectors=connectors)
+    assert len(enclosure.connector_offsets) == connectors
+    assert enclosure.body.is_valid

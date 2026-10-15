@@ -19,7 +19,7 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
         lid ── 2 mm o-ring cord in the wall rim groove
  ┌───────────────────────────────┐
  │ bay │   BMSS24 board          │   enclosure
- │ ┌─┐ │                         │◄── M12 4-pin panel connector (isoSPI in + out)
+ │ ┌─┐ │                         │◄── two M12 4-pin panel connectors (isoSPI in, out)
  └─┤ ├─┴─────────────────────────┘
    │ │ ◄── socket over the spigot, two 20 x 2 mm o-rings
  ══╧═╧══ port plug flange (M4 flat head screws in the existing holes)
@@ -46,13 +46,20 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
 5. **Mounting screws:** the port's two existing holes are outside the port
    seal. Put bonded sealing washers under the nuts inside the battery box.
 
-## isoSPI connector
+## isoSPI connectors
 
-One 4-pin sealed connector, on the end wall by the board's isoSPI connectors, carries the whole chain: IPI/IMI in from the
-previous device and IPO/IMO out to the next one. The default hole (16.2 mm)
-fits M12 A-coded panel receptacles with an M16 x 1.5 rear thread. Each
-inter-box cable then carries two twisted pairs. On the last satellite, the
-out pair stays unconnected.
+The chain runs MCU → box 1 → box 2 → box 3. Each enclosure has two M12
+A-coded 4-pin connectors on the end wall by the board's isoSPI plugs: one
+for the pair in (IPI/IMI) and one for the pair out (IPO/IMO). The holes
+(16.2 mm) fit panel receptacles with an M16 x 1.5 rear thread. Leave box 3's
+out connector capped.
+
+Make the three cables to length from 2-pair twisted shielded cable with
+field-attachable M12 plugs (screw terminals). Put one pair on pins 1-2 and
+the other on pins 3-4, and wire both ends the same way.
+
+The `one-connector` preset carries both pairs on one connector, but then
+the cables have to be a branched harness.
 
 ## Print notes
 

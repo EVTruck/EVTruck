@@ -6,9 +6,11 @@ socket in its floor slides over the plug's double o-ring spigot and two M3
 screws hold it down. The cell-tap and thermistor wires come up through the
 spigot into a wiring bay at one end.
 
-One 4-pin sealed panel connector on the far end wall carries the isoSPI
-daisy chain (IPI/IMI in, IPO/IMO out). The default hole fits M12 A-coded
-panel receptacles with an M16 x 1.5 rear thread.
+Sealed 4-pin panel connectors on the far end wall carry the isoSPI daisy
+chain. By default there are two, one for the pair in (IPI/IMI) and one for
+the pair out (IPO/IMO), so plain point-to-point cables link the boxes. Set
+``isospi_connectors = 1`` to carry both pairs on one connector. The holes
+fit M12 A-coded panel receptacles with an M16 x 1.5 rear thread.
 
 The lid seals on a 2 mm o-ring cord in a groove on the wall rim. The lid
 screws are in bosses outside the seal.
@@ -73,6 +75,8 @@ class SatelliteEnclosure(Model):
     seal_groove_depth: float = 1.5 * MM
 
     connector_hole_diameter: float = 16.2 * MM  # M12 receptacle, M16 thread
+    isospi_connectors: int = 2  # In and out, or 1 for both pairs on one
+    connector_spacing: float = 30 * MM
 
     printable: bool = False  # Body and lid only, laid out for printing
     show_plug: bool = True
@@ -82,6 +86,11 @@ class SatelliteEnclosure(Model):
             "print",
             description="Body and lid laid flat for printing",
             printable=True,
+        ),
+        Preset(
+            "one-connector",
+            description="Both isoSPI pairs on a single connector",
+            isospi_connectors=1,
         ),
     )
 
@@ -153,6 +162,13 @@ class SatelliteEnclosure(Model):
     @property
     def board_center_x(self) -> float:
         return self.interior_x0 + self.bay_length + self.board_length / 2
+
+    @property
+    def connector_offsets(self) -> list[float]:
+        n = self.isospi_connectors
+        if n not in (1, 2):
+            raise ValueError("isospi_connectors must be 1 or 2")
+        return [(i - (n - 1) / 2) * self.connector_spacing for i in range(n)]
 
     @property
     def board_hole_locations(self) -> list[tuple[float, float]]:
@@ -287,13 +303,16 @@ class SatelliteEnclosure(Model):
                 self._outline(wall / 2 - gw / 2, mode=Mode.SUBTRACT)
             extrude(amount=-self.seal_groove_depth, mode=Mode.SUBTRACT)
 
-            # isoSPI connector hole in the far end wall, by the board's
+            # isoSPI connector holes in the far end wall, by the board's
             # isoSPI connectors
             with Locations(
-                Pos(
-                    self.interior_x0 + self.interior_length + wall / 2,
-                    0,
-                    self.floor_thickness + self.interior_height / 2,
+                *(
+                    Pos(
+                        self.interior_x0 + self.interior_length + wall / 2,
+                        y,
+                        self.floor_thickness + self.interior_height / 2,
+                    )
+                    for y in self.connector_offsets
                 )
             ):
                 Cylinder(
