@@ -48,7 +48,7 @@ Export STLs with `uv run bdbox export <model file> <dir> -f stl` (add `-a` for e
 
 ## isoSPI connector
 
-One 4-pin sealed connector carries the whole chain: IPI/IMI in from the
+One 4-pin sealed connector, on the end wall by the board's isoSPI connectors, carries the whole chain: IPI/IMI in from the
 previous device and IPO/IMO out to the next one. The default hole (16.2 mm)
 fits M12 A-coded panel receptacles with an M16 x 1.5 rear thread. Each
 inter-box cable then carries two twisted pairs. On the last satellite, the
@@ -64,8 +64,9 @@ out pair stays unconnected.
 
 ## Measurements still needed
 
-The defaults were estimated from photos and the Serpac WM031 case size. Check
-them before printing anything but the fit test:
+The port defaults were estimated from photos. Check them before printing
+anything but the fit test. The board sizes were measured from ruler photos on
+2026-10-15 (about ±1 mm), with an 11 mm overall thickness confirmed by hand.
 
 | Parameter | Default | What to measure |
 |---|---|---|
@@ -74,6 +75,6 @@ them before printing anything but the fit test:
 | `port_depth` | 10 mm | Plate thickness at the port, and whether the port goes all the way through |
 | `mount_hole_spacing` | 46 mm | Center-to-center of the two mounting holes |
 | `mount_hole_offset` | -11.5 mm | Hole centers from the port center, toward the holes |
-| `board_length`, `board_width` | 125 x 74 mm | BMSS24 board outline |
-| `board_hole_inset` | 4 mm | Board mounting holes from the edges |
-| `component_height` | 18 mm | Tallest part on the board, including mated plugs |
+| `board_length`, `board_width` | 100 x 74 mm (measured) | PCB outline; connectors add about 10 mm overall |
+| `board_hole_spacing_length`, `_width` | 52 x 62 mm (measured) | Mounting hole pattern (four plated M3 holes) |
+| `component_height` | 10 mm (measured) | Tallest part above the PCB |

@@ -6,7 +6,7 @@ socket in its floor slides over the plug's double o-ring spigot and two M3
 screws hold it down. The cell-tap and thermistor wires come up through the
 spigot into a wiring bay at one end.
 
-One 4-pin sealed panel connector on the bay end wall carries the isoSPI
+One 4-pin sealed panel connector on the far end wall carries the isoSPI
 daisy chain (IPI/IMI in, IPO/IMO out). The default hole fits M12 A-coded
 panel receptacles with an M16 x 1.5 rear thread.
 
@@ -47,18 +47,21 @@ from .port_plug import PortPlug
 
 
 class SatelliteEnclosure(Model):
-    # BMSS24 board. No drawing is published; measure the board before
-    # printing. Defaults assume a board that fits the 3.3" x 5.4" Serpac
-    # WM031 case.
-    board_length: float = 125 * MM
-    board_width: float = 74 * MM
+    # BMSS24 board, measured from photos (2026-10-15). The cell-tap
+    # connectors face the wiring bay and the isoSPI connectors face the far
+    # end. The 10-pin thermistor connectors face out of the long sides.
+    board_length: float = 100 * MM  # PCB only; connectors overhang the ends
+    board_width: float = 74 * MM  # PCB only; connectors overhang the sides
     board_thickness: float = 1.6 * MM
-    board_hole_inset: float = 4 * MM  # Hole centers from each board edge
-    component_height: float = 18 * MM  # Tallest part above the board
-    standoff_height: float = 6 * MM
-    board_clearance: float = 4 * MM  # Gap around the board for plugs
+    board_hole_spacing_length: float = 52 * MM
+    board_hole_spacing_width: float = 62 * MM
+    board_hole_offset: float = -3.5 * MM  # Hole pattern shift toward the bay
+    component_height: float = 10 * MM  # 11 mm overall with the PCB
+    standoff_height: float = 18 * MM  # Lifts the plugs over the socket tube
+    side_clearance: float = 18 * MM  # Thermistor plugs and wire bends
+    end_clearance: float = 25 * MM  # isoSPI plugs at the far end
 
-    bay_length: float = 45 * MM  # Wiring bay over the socket
+    bay_length: float = 40 * MM  # Wiring bay over the socket
     wall_thickness: float = 4.5 * MM
     floor_thickness: float = 3 * MM
     inner_corner_radius: float = 2 * MM
@@ -115,11 +118,11 @@ class SatelliteEnclosure(Model):
 
     @property
     def interior_length(self) -> float:
-        return self.bay_length + self.board_length + 2 * self.board_clearance
+        return self.bay_length + self.board_length + self.end_clearance
 
     @property
     def interior_width(self) -> float:
-        return self.board_width + 2 * self.board_clearance
+        return self.board_width + 2 * self.side_clearance
 
     @property
     def interior_height(self) -> float:
@@ -149,22 +152,14 @@ class SatelliteEnclosure(Model):
 
     @property
     def board_center_x(self) -> float:
-        return (
-            self.interior_x0
-            + self.bay_length
-            + self.board_clearance
-            + self.board_length / 2
-        )
+        return self.interior_x0 + self.bay_length + self.board_length / 2
 
     @property
     def board_hole_locations(self) -> list[tuple[float, float]]:
-        dx = self.board_length / 2 - self.board_hole_inset
-        dy = self.board_width / 2 - self.board_hole_inset
-        return [
-            (self.board_center_x + sx * dx, sy * dy)
-            for sx in (-1, 1)
-            for sy in (-1, 1)
-        ]
+        cx = self.board_center_x + self.board_hole_offset
+        dx = self.board_hole_spacing_length / 2
+        dy = self.board_hole_spacing_width / 2
+        return [(cx + sx * dx, sy * dy) for sx in (-1, 1) for sy in (-1, 1)]
 
     @property
     def lid_boss_locations(self) -> list[tuple[float, float]]:
@@ -292,10 +287,11 @@ class SatelliteEnclosure(Model):
                 self._outline(wall / 2 - gw / 2, mode=Mode.SUBTRACT)
             extrude(amount=-self.seal_groove_depth, mode=Mode.SUBTRACT)
 
-            # isoSPI connector hole in the bay end wall
+            # isoSPI connector hole in the far end wall, by the board's
+            # isoSPI connectors
             with Locations(
                 Pos(
-                    self.interior_x0 - wall / 2,
+                    self.interior_x0 + self.interior_length + wall / 2,
                     0,
                     self.floor_thickness + self.interior_height / 2,
                 )
