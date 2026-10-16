@@ -26,7 +26,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 keywords = []
-dependencies = ["bdbox>=0.26.0", "build123d>=0.11"]
+dependencies = ["bd-warehouse>=0.4.0", "bdbox>=0.26.0", "build123d>=0.11"]
 
 [project.urls]
 Homepage = "https://github.com/EVTruck/EVTruck"
