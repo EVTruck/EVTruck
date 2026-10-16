@@ -5,9 +5,9 @@ from enum import IntEnum
 from functools import cached_property, partial, reduce
 from operator import iadd, itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
-from bd_warehouse.fastener import ClearanceHole, HexNut
+from bd_warehouse.fastener import ClearanceHole, HexNut, Nut, Screw
 from bdbox import Model
 from build123d import (
     MM,
@@ -225,6 +225,43 @@ class ContactorBox(Compound):
         if not p.part:
             raise RuntimeError("Empty part")
         return p.part
+
+
+class PrintableClearanceHole(BasePartObject):
+    def __init__(
+        self,
+        fastener: Nut | Screw,
+        fit: Literal["Close", "Normal", "Loose"] = "Normal",
+        depth: float | None = None,
+        *,
+        counter_sunk: bool = True,
+        captive_nut: bool = False,
+        rotation: RotationLike = (0, 0, 0.0),
+        align: tuple[Align, Align, Align] | None = None,
+        mode: Mode = Mode.SUBTRACT,
+    ) -> None:
+        with BuildPart() as p:
+            ClearanceHole(
+                fastener=fastener,
+                fit=fit,
+                depth=depth,
+                counter_sunk=counter_sunk,
+                captive_nut=captive_nut,
+                rotation=rotation,
+                mode=Mode.ADD,
+            )
+            hole_d = fastener.clearance_hole_diameters[fit]
+            bottom_face = p.faces().filter_by(Plane.XY).group_by(Axis.Z)[0]
+            with BuildSketch(bottom_face):
+                insert(bottom_face)
+                Rectangle(hole_d, hole_d * 4, mode=Mode.INTERSECT)
+            extrude(amount=0.4, mode=Mode.ADD)
+        if not p.part:
+            raise RuntimeError("Empty part")
+        p.part.label = type(self).__name__
+        super().__init__(
+            part=p.part, rotation=rotation, align=align, mode=mode
+        )
 
 
 class MountingPlate(BasePartObject):
@@ -459,7 +496,7 @@ class GigavacGV200Contactor(Compound):
                 GridLocations(self.mounting_hole_separation, 0, 2, 1),
                 Locations(Pos(0, 0, -plate_thickness) * Rot(180, 0, 0)),
             ):
-                ClearanceHole(
+                PrintableClearanceHole(
                     HexNut(
                         size="M5-0.8",
                         fastener_type="iso4032",
