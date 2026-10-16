@@ -361,7 +361,7 @@ class MountingPlate(BasePartObject):
             contactor_location = face.location_at(0.5, 0.23)
             contactor_location.orientation = (0, 0, 180 - 22.5)
             RigidJoint("contactor_attach", joint_location=contactor_location)
-            contactor_12v_location = face.location_at(0.4, 0.5)
+            contactor_12v_location = face.location_at(0.35, 0.5)
             contactor_12v_location.orientation = (0, 0, 180)
             RigidJoint(
                 "contactor_12v_attach", joint_location=contactor_12v_location
@@ -373,8 +373,8 @@ class MountingPlate(BasePartObject):
                 "shunt_attach",
                 joint_location=face.location_at(0.23, 0.75),
             )
-            relay_location = face.location_at(0.15, 0.5)
-            relay_location.orientation = (0, 0, 90)
+            relay_location = face.location_at(0.12, 0.45)
+            relay_location.orientation = (0, 0, 0)
             RigidJoint("relay_attach", joint_location=relay_location)
         if not p.part:
             raise RuntimeError("Empty part")
