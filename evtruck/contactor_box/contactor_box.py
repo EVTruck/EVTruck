@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from copy import copy
 from enum import IntEnum
-from functools import cached_property
+from functools import cached_property, reduce
+from operator import iadd, itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -243,11 +244,25 @@ class MountingPlate(BasePartObject):
         base_z = mbox.standoff_faces[0].center_location.position.Z
         intersect_rect = Rectangle(20, 1.7 * 2, mode=Mode.PRIVATE)
         with BuildPart() as p:
-            with BuildSketch(Plane.XY.offset(base_z)):
+            with BuildSketch(Plane.XY.offset(base_z)) as sk:
                 offset(
-                    copy(blank_face),
-                    amount=-plate_edge_fit,
+                    offset(
+                        copy(blank_face),
+                        amount=-2,
+                        mode=Mode.PRIVATE,
+                    ),
+                    amount=2 - plate_edge_fit,
+                    kind=Kind.INTERSECTION,
                     mode=Mode.ADD,
+                )
+                fillet(
+                    reduce(
+                        iadd,
+                        itemgetter(-3, -1, 0, 2)(
+                            sk.vertices().group_by(Axis.Y)
+                        ),
+                    ),
+                    plate_thickness / 2,
                 )
                 if print_test:
                     with BuildSketch(mode=Mode.SUBTRACT) as sk_cutouts:
