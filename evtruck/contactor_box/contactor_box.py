@@ -532,6 +532,41 @@ class TE12VContactor(Compound):
         imported_model.color = Color(0xBBBBBB, 0xFF)
         return Compound(children=[imported_model], label="TE-LEV100A4ANG")
 
+    class MountHoles(BasePartObject):
+        mounting_hole_separation = 46.32 * MM
+
+        def __init__(
+            self,
+            plate_thickness: float,
+            rotation: RotationLike = (0, 0, 0.0),
+            align: tuple[Align, Align, Align] | None = None,
+            mode: Mode = Mode.SUBTRACT,
+        ) -> None:
+            with (
+                BuildPart() as p,
+                GridLocations(self.mounting_hole_separation, 0, 2, 1),
+                Locations(Pos(0, 0, -plate_thickness) * Rot(180, 0, 0)),
+            ):
+                PrintableClearanceHole(
+                    HexNut(
+                        size="M4-0.7",
+                        fastener_type="iso4032",
+                        simple=True,
+                        mode=Mode.ADD,
+                    ),
+                    depth=plate_thickness,
+                    fit="Normal",
+                    captive_nut=True,
+                    mode=Mode.ADD,
+                )
+
+            if not p.part:
+                raise RuntimeError("Empty part")
+            p.part.label = type(self).__name__
+            super().__init__(
+                part=p.part, rotation=rotation, align=align, mode=mode
+            )
+
 
 class FuseBlock(Compound):
     def __init__(self) -> None:
@@ -576,10 +611,44 @@ class FuseBlock(Compound):
         imported_model.label = "DIN rail 100mm"
         return imported_model
 
+    class MountHoles(BasePartObject):
+        mounting_hole_separation = 25 * MM
+
+        def __init__(
+            self,
+            plate_thickness: float,
+            rotation: RotationLike = (0, 0, 0.0),
+            align: tuple[Align, Align, Align] | None = None,
+            mode: Mode = Mode.SUBTRACT,
+        ) -> None:
+            with (
+                BuildPart() as p,
+                Locations(Rot(0, 0, 0), Rot(0, 0, 90)),
+                GridLocations(self.mounting_hole_separation, 0, 4, 1),
+                Locations(Pos(0, 0, -plate_thickness) * Rot(180, 0, 0)),
+            ):
+                PrintableClearanceHole(
+                    HexNut(
+                        size="M6-1",
+                        fastener_type="iso4032",
+                        simple=True,
+                        mode=Mode.ADD,
+                    ),
+                    depth=plate_thickness,
+                    fit="Normal",
+                    captive_nut=True,
+                    mode=Mode.ADD,
+                )
+
+            if not p.part:
+                raise RuntimeError("Empty part")
+            p.part.label = type(self).__name__
+            super().__init__(
+                part=p.part, rotation=rotation, align=align, mode=mode
+            )
+
 
 class Shunt(Compound):
-    mounting_hole_separation = 31.75 * MM
-
     def __init__(self) -> None:
         imported = self._import()
         super().__init__(children=imported.children, label=imported.label)
@@ -593,10 +662,43 @@ class Shunt(Compound):
         )
         return imported_model
 
+    class MountHoles(BasePartObject):
+        mounting_hole_separation = 31.75 * MM
+
+        def __init__(
+            self,
+            plate_thickness: float,
+            rotation: RotationLike = (0, 0, 0.0),
+            align: tuple[Align, Align, Align] | None = None,
+            mode: Mode = Mode.SUBTRACT,
+        ) -> None:
+            with (
+                BuildPart() as p,
+                GridLocations(0, self.mounting_hole_separation, 1, 2),
+                Locations(Pos(0, 0, -plate_thickness) * Rot(180, 0, 0)),
+            ):
+                PrintableClearanceHole(
+                    HexNut(
+                        size="M5-0.8",
+                        fastener_type="iso4032",
+                        simple=True,
+                        mode=Mode.ADD,
+                    ),
+                    depth=plate_thickness,
+                    fit="Normal",
+                    captive_nut=True,
+                    mode=Mode.ADD,
+                )
+
+            if not p.part:
+                raise RuntimeError("Empty part")
+            p.part.label = type(self).__name__
+            super().__init__(
+                part=p.part, rotation=rotation, align=align, mode=mode
+            )
+
 
 class Relay(Compound):
-    mounting_hole_separation = 43.6 * MM
-
     def __init__(self) -> None:
         imported = self._import()
         super().__init__(children=imported.children, label=imported.label)
@@ -609,6 +711,41 @@ class Relay(Compound):
         return Compound(
             children=[imported_model.transformed(offset=(0, 0, -bbox.min.Z))]
         )
+
+    class MountHoles(BasePartObject):
+        mounting_hole_separation = 43.6 * MM
+
+        def __init__(
+            self,
+            plate_thickness: float,
+            rotation: RotationLike = (0, 0, 0.0),
+            align: tuple[Align, Align, Align] | None = None,
+            mode: Mode = Mode.SUBTRACT,
+        ) -> None:
+            with (
+                BuildPart() as p,
+                GridLocations(0, self.mounting_hole_separation, 1, 2),
+                Locations(Pos(0, 0, -plate_thickness) * Rot(180, 0, 0)),
+            ):
+                PrintableClearanceHole(
+                    HexNut(
+                        size="M3-0.5",
+                        fastener_type="iso4032",
+                        simple=True,
+                        mode=Mode.ADD,
+                    ),
+                    depth=plate_thickness,
+                    fit="Normal",
+                    captive_nut=True,
+                    mode=Mode.ADD,
+                )
+
+            if not p.part:
+                raise RuntimeError("Empty part")
+            p.part.label = type(self).__name__
+            super().__init__(
+                part=p.part, rotation=rotation, align=align, mode=mode
+            )
 
 
 class ContactorBoxAssembly(Model):
@@ -652,7 +789,7 @@ class ContactorBoxAssembly(Model):
         return TE12VContactor()
 
     @cached_property
-    def fuse_block(self) -> Compound:
+    def fuse_block(self) -> FuseBlock:
         return FuseBlock()
 
     @cached_property
@@ -696,39 +833,18 @@ class ContactorBoxAssembly(Model):
             with Locations(mp.joints["contactor_attach"].location):
                 self.contactor.mount_base()
                 self.contactor.MountHoles(plate_thickness=self.plate_thickness)
-
-            with (
-                Locations(mp.joints["fuse_block_attach"].location),
-                Locations(Rot(0, 0, 0), Rot(0, 0, 90)),
-                GridLocations(25 * MM, 0, 4, 1),
-            ):
-                Cylinder(
-                    radius=3.1,
-                    height=self.plate_thickness,
-                    align=(Align.CENTER, Align.CENTER, Align.MAX),
-                    mode=Mode.SUBTRACT,
+            with Locations(mp.joints["contactor_12v_attach"].location):
+                self.contactor_12v.MountHoles(
+                    plate_thickness=self.plate_thickness
                 )
-            with (
-                Locations(mp.joints["shunt_attach"].location),
-                GridLocations(0, self.shunt.mounting_hole_separation, 1, 2),
-            ):
-                Cylinder(
-                    radius=2.55,
-                    height=self.plate_thickness,
-                    align=(Align.CENTER, Align.CENTER, Align.MAX),
-                    mode=Mode.SUBTRACT,
+            with Locations(mp.joints["fuse_block_attach"].location):
+                self.fuse_block.MountHoles(
+                    plate_thickness=self.plate_thickness
                 )
-
-            with (
-                Locations(mp.joints["relay_attach"].location),
-                GridLocations(0, self.relay.mounting_hole_separation, 1, 2),
-            ):
-                Cylinder(
-                    radius=1.8,
-                    height=self.plate_thickness,
-                    align=(Align.CENTER, Align.CENTER, Align.MAX),
-                    mode=Mode.SUBTRACT,
-                )
+            with Locations(mp.joints["shunt_attach"].location):
+                self.shunt.MountHoles(plate_thickness=self.plate_thickness)
+            with Locations(mp.joints["relay_attach"].location):
+                self.relay.MountHoles(plate_thickness=self.plate_thickness)
 
         if not p.part:
             raise RuntimeError("empty part")
