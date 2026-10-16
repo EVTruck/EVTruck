@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from copy import copy
 from enum import IntEnum
-from functools import cached_property, reduce
+from functools import cached_property, partial, reduce
 from operator import iadd, itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bd_warehouse.fastener import ClearanceHole, HexNut
 from bdbox import Model
 from build123d import (
     MM,
@@ -41,6 +42,7 @@ from build123d import (
     fillet,
     import_step,
     insert,
+    loft,
     offset,
     scale,
 )
@@ -345,8 +347,6 @@ class MountingPlate(BasePartObject):
 
 
 class GigavacGV200Contactor(Compound):
-    mounting_hole_separation = 68.2752 * MM
-
     class NamedPart(IntEnum):
         HOUSING = 0
         MOUNTING_HOLE_A1 = 1
@@ -403,6 +403,81 @@ class GigavacGV200Contactor(Compound):
             if part not in exclude_parts
         )
         return assembly
+
+    @cached_property
+    def housing_profile(self) -> Face:
+        housing = self.children[self.NamedPart.HOUSING]
+        with BuildSketch() as sk:
+            insert(-housing.faces().filter_by(Plane.XY).sort_by(Axis.Z)[0])
+        return sk.face()
+
+    @cached_property
+    def mount_base(self) -> partial[GigavacGV200Contactor.MountBase]:
+        return partial(self.MountBase, contactor=self)
+
+    class MountBase(BasePartObject):
+        def __init__(
+            self,
+            contactor: GigavacGV200Contactor,
+            rotation: RotationLike = (0, 0, 0.0),
+            align: tuple[Align, Align, Align] | None = None,
+            mode: Mode = Mode.ADD,
+        ) -> None:
+            bottom_face = contactor.housing_profile.face()
+            grip_faces = (
+                (bottom_face.without_holes() - bottom_face)
+                .faces()
+                .group_by(SortBy.DISTANCE)
+            )[1]
+            with BuildPart() as p:
+                for face in grip_faces.faces():
+                    with BuildSketch(Plane.XY):
+                        offset(face, amount=-0.2)
+                    with BuildSketch(Plane.XY.offset(12.7)) as sk2:
+                        offset(copy(face), amount=-0.8)
+                        fillet(sk2.vertices(), 0.8)
+                    loft()
+            if not p.part:
+                raise RuntimeError("Empty part")
+            p.part.label = type(self).__name__
+            super().__init__(
+                part=p.part, rotation=rotation, align=align, mode=mode
+            )
+
+    class MountHoles(BasePartObject):
+        mounting_hole_separation = 68.2752 * MM
+
+        def __init__(
+            self,
+            plate_thickness: float,
+            rotation: RotationLike = (0, 0, 0.0),
+            align: tuple[Align, Align, Align] | None = None,
+            mode: Mode = Mode.SUBTRACT,
+        ) -> None:
+            with (
+                BuildPart() as p,
+                GridLocations(self.mounting_hole_separation, 0, 2, 1),
+                Locations(Pos(0, 0, -plate_thickness) * Rot(180, 0, 0)),
+            ):
+                ClearanceHole(
+                    HexNut(
+                        size="M5-0.8",
+                        fastener_type="iso4032",
+                        simple=True,
+                        mode=Mode.ADD,
+                    ),
+                    depth=plate_thickness,
+                    fit="Normal",
+                    captive_nut=True,
+                    mode=Mode.ADD,
+                )
+
+            if not p.part:
+                raise RuntimeError("Empty part")
+            p.part.label = type(self).__name__
+            super().__init__(
+                part=p.part, rotation=rotation, align=align, mode=mode
+            )
 
 
 class TE12VContactor(Compound):
@@ -581,18 +656,9 @@ class ContactorBoxAssembly(Model):
             for joint in mp.joints.values():
                 RigidJoint(joint.label, joint_location=joint.location)
 
-            with (
-                Locations(mp.joints["contactor_attach"].location),
-                GridLocations(
-                    self.contactor.mounting_hole_separation, 0, 2, 1
-                ),
-            ):
-                Cylinder(
-                    radius=3,
-                    height=self.plate_thickness,
-                    align=(Align.CENTER, Align.CENTER, Align.MAX),
-                    mode=Mode.SUBTRACT,
-                )
+            with Locations(mp.joints["contactor_attach"].location):
+                self.contactor.mount_base()
+                self.contactor.MountHoles(plate_thickness=self.plate_thickness)
 
             with (
                 Locations(mp.joints["fuse_block_attach"].location),
