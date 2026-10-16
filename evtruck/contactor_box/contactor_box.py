@@ -503,10 +503,10 @@ class ContactorBoxAssembly(Model):
     print_test: bool = False
     simple: bool = False
 
-    plate_thickness: float = 5 * MM
+    plate_thickness: float = 8 * MM
     plate_edge_fit: float = 1 * MM
     plate_standoff_fit: float = 1 * MM
-    plate_sunk_depth: float = 3 * MM
+    plate_sunk_depth: float = 5 * MM
     screw_fit: float = 0.4 * MM
 
     def build(self) -> Model.Geometry:
